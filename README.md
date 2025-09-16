@@ -1,67 +1,92 @@
+## Civic Pulse - Monorepo (Backend + Frontend)
 
+A full-stack TypeScript project with an Express + MongoDB backend and a Vite + React (shadcn/ui, Tailwind) frontend.
 
-# SIH Project: Civic Pulse Admin Panel
+### Prerequisites
+- Node.js 18+ and npm
+- A running MongoDB instance (local or Atlas)
 
-This is the admin dashboard for the Civic Pulse application, a platform designed to monitor, manage, and resolve civic issues reported by citizens. This frontend provides administrators with the necessary tools to track new and ongoing issues, assign them to relevant departments, and update their statuses.
+### Repository Structure
+- `backend/` Express API (TypeScript, Mongoose)
+- `frontend/` Vite React app (TypeScript)
 
-## Features
+### Quick Start (Development)
+Open two terminals in the project root.
 
-  * **Dashboard:** An overview of all reported issues.
-  * **Issue Management:** View details, filter, and sort issues by category, status, or priority.
-  * **User Actions:** Assign tasks, mark issues as resolved, accept, or reject reports.
-  * **Responsive UI:** A clean and modern interface built with Tailwind CSS.
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed on your system:
-
-  * [Node.js](https://nodejs.org/) (v18 or newer recommended)
-  * [npm](https://www.npmjs.com/) (comes with Node.js)
-  * [Git](https://git-scm.com/)
-
-## Getting Started
-
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
-
-### 1\. Clone the Repository
-
-First, clone the repository to your local machine using Git.
-
+1) Backend
 ```bash
-git clone https://github.com/kanhaiya-98/SIH-PROJECT.git
-```
+cd backend
+npm install
 
-### 2\. Navigate to the Project Directory
+# Create .env
+echo MONGODB_URI="mongodb://localhost:27017/civic_pulse" > .env
+echo PORT=4000 >> .env
 
-Move into the newly created project folder.
-
-```bash
-cd SIH-PROJECT
-```
-
-### 3\. Install Dependencies
-
-This project has known peer dependency conflicts between its packages. To resolve this, you must use the `--legacy-peer-deps` flag during installation. This tells npm to use an older, less strict dependency resolution algorithm, which is required for this project to work correctly.
-
-```bash
-npm install --legacy-peer-deps
-```
-
-### 4\. Run the Development Server
-
-Once the installation is complete, you can start the local development server.
-
-```bash
 npm run dev
+# Server on http://localhost:4000
+# Health: http://localhost:4000/api/health
 ```
 
-This will start the application and make it available in your web browser. The terminal will display the local URL, which is typically **http://localhost:5173/**.
+2) Frontend
+```bash
+cd frontend
+npm install
 
-## Technologies Used
+# Optional during dev: Vite proxy forwards /api -> http://localhost:4000
+# If you want to override, create .env and set VITE_API_BASE_URL
 
-  * **Vite:** A next-generation frontend tooling for fast development.
-  * **React:** A JavaScript library for building user interfaces.
-  * **TypeScript:** A statically typed superset of JavaScript.
-  * **Tailwind CSS:** A utility-first CSS framework for rapid UI development.
+npm run dev
+# App on http://localhost:8080
+```
 
------
+Notes:
+- During development, frontend requests use `'/api'` which Vite proxies to the backend at `http://localhost:4000` (see `frontend/vite.config.ts`).
+- The backend requires `MONGODB_URI` to start.
+
+### Environment Variables
+- Backend (`backend/.env`)
+  - `MONGODB_URI` (required): MongoDB connection string
+  - `PORT` (optional, default 4000): API port
+- Frontend (`frontend/.env`)
+  - `VITE_API_BASE_URL` (optional in dev): e.g. `https://your-domain.com/api` when building for production
+
+### Useful Scripts
+- Backend
+  - `npm run dev` — start TS server with live reload
+  - `npm run build` — compile to `dist/`
+  - `npm start` — run compiled server
+- Frontend
+  - `npm run dev` — start Vite dev server
+  - `npm run build` — production build to `dist/`
+  - `npm run preview` — preview the built app locally
+
+### Production Builds
+1) Backend
+```bash
+cd backend
+npm install
+npm run build
+npm start
+```
+2) Frontend
+```bash
+cd frontend
+# Ensure .env has VITE_API_BASE_URL pointing to your deployed API
+npm install
+npm run build
+npm run preview  # or serve the dist/ folder via your web server
+```
+
+### Troubleshooting
+- MongoDB connection error: Ensure `MONGODB_URI` is set and MongoDB is reachable.
+- Port already in use: Change `PORT` in `backend/.env`; the frontend dev server runs on 8080 by default (see `frontend/vite.config.ts`).
+- API requests fail in production: Set `VITE_API_BASE_URL` to your live API base, e.g. `https://api.example.com/api`.
+
+### API Overview (high-level)
+- Base path: `/api`
+- Routes: `/auth`, `/issues`, `/users`, `/analytics`, and `/health`
+
+### License
+MIT
+
+

@@ -26,6 +26,13 @@ app.use('/api/issues', issuesRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/analytics', analyticsRouter);
 
+// Error handler (ensure JSON responses on errors)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ message: 'Internal Server Error', error: err?.message });
+});
+
 const PORT = process.env.PORT || 4000;
 
 async function start() {
