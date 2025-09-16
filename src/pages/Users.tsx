@@ -30,9 +30,9 @@ import {
 const users = [
   {
     id: '1',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@civic.gov',
-    phone: '+1-555-0101',
+    name: 'Kanhaiya Gupta',
+    email: 'kanha.gupta@civic.gov',
+    phone: '9326650454',
     role: 'admin',
     department: 'Administration',
     status: 'active',
