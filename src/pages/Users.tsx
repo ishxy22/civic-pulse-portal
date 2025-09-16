@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const users = [
+const staticUsers = [
   {
     id: '1',
     name: 'Kanhaiya Gupta',
@@ -108,11 +108,28 @@ const users = [
   }
 ];
 
+import { API_BASE_URL } from '@/lib/utils';
+
 export default function Users() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [users, setUsers] = useState<any[]>(staticUsers);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/users`);
+        const data = await res.json();
+        setUsers(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -151,7 +168,7 @@ export default function Users() {
     }
   };
 
-  const departments = Array.from(new Set(users.map(user => user.department)));
+  const departments = Array.from(new Set(users.map(user => user.department).filter(Boolean)));
 
   return (
     <div className="space-y-6">
@@ -260,7 +277,7 @@ export default function Users() {
       {/* Results Summary */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredUsers.length} of {users.length} users
+          {loading ? 'Loading users…' : `Showing ${filteredUsers.length} of ${users.length} users`}
         </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">Sort by Name</Button>

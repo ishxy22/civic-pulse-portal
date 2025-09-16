@@ -11,17 +11,21 @@ import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState<'admin' | 'department_officer' | 'field_worker'>('department_officer');
+  const [isSignup, setIsSignup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
+  const { login, signup, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    const success = await login(email, password);
+    const success = isSignup 
+      ? await signup({ name, email, password, role })
+      : await login(email, password);
     if (!success) {
-      setError('Invalid credentials. Try admin@civic.gov with password "password"');
+      setError(isSignup ? 'Signup failed (email may exist).' : 'Invalid credentials.');
     }
   };
 
@@ -58,6 +62,13 @@ export function LoginForm() {
                 </Alert>
               )}
               
+              {isSignup && (
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required={isSignup} />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -98,6 +109,17 @@ export function LoginForm() {
                   </Button>
                 </div>
               </div>
+
+              {isSignup && (
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <select id="role" className="w-full border rounded h-10 px-3 bg-background" value={role} onChange={(e) => setRole(e.target.value as any)}>
+                    <option value="admin">Admin</option>
+                    <option value="department_officer">Department Officer</option>
+                    <option value="field_worker">Field Worker</option>
+                  </select>
+                </div>
+              )}
             </CardContent>
             
             <CardFooter className="flex flex-col space-y-4">
@@ -106,7 +128,10 @@ export function LoginForm() {
                 className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300" 
                 disabled={isLoading}
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                {isLoading ? (isSignup ? 'Signing up...' : 'Signing in...') : (isSignup ? 'Sign Up' : 'Sign In')}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setIsSignup(!isSignup)}>
+                {isSignup ? 'Have an account? Sign In' : "Don't have an account? Sign Up"}
               </Button>
               
               <div className="text-sm text-muted-foreground">

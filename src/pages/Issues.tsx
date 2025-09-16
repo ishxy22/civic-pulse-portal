@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockIssues } from '@/data/mockData';
+import { API_BASE_URL } from '@/lib/utils';
 import {
   Search,
   Filter,
@@ -25,8 +25,64 @@ export default function Issues() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [issues, setIssues] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newIssue, setNewIssue] = useState({
+    title: '',
+    description: '',
+    category: 'infrastructure',
+    priority: 'medium',
+    reporterName: '',
+    reporterEmail: '',
+    reporterPhone: '',
+    address: ''
+  });
 
-  const filteredIssues = mockIssues.filter(issue => {
+  const fetchIssues = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/issues`);
+        const data = await res.json();
+        setIssues(data);
+      } finally {
+        setLoading(false);
+      }
+  };
+
+  useEffect(() => { fetchIssues(); }, []);
+
+  const createIssue = async () => {
+    setIsCreating(true);
+    try {
+      await fetch(`${API_BASE_URL}/issues`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newIssue.title,
+          description: newIssue.description,
+          category: newIssue.category,
+          priority: newIssue.priority,
+          location: { address: newIssue.address, coordinates: [0, 0] },
+          reporter: { name: newIssue.reporterName, email: newIssue.reporterEmail, phone: newIssue.reporterPhone }
+        })
+      });
+      await fetchIssues();
+      setNewIssue({ title: '', description: '', category: 'infrastructure', priority: 'medium', reporterName: '', reporterEmail: '', reporterPhone: '', address: '' });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    await fetch(`${API_BASE_URL}/issues/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    fetchIssues();
+  };
+
+  const filteredIssues = issues.filter(issue => {
     const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          issue.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          issue.location.address.toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,12 +140,49 @@ export default function Issues() {
             <Filter className="mr-2 h-4 w-4" />
             Export Data
           </Button>
-          <Button className="bg-gradient-primary hover:shadow-glow transition-all duration-300">
+          <Button className="bg-gradient-primary hover:shadow-glow transition-all duration-300" onClick={createIssue} disabled={isCreating}>
             <AlertTriangle className="mr-2 h-4 w-4" />
-            New Issue
+            {isCreating ? 'Creating...' : 'New Issue'}
           </Button>
         </div>
       </div>
+
+      {/* Quick Create Issue Form */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="text-lg">Create New Issue</CardTitle>
+          <CardDescription>Fill details and click New Issue to submit</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <Input placeholder="Title" value={newIssue.title} onChange={(e) => setNewIssue({ ...newIssue, title: e.target.value })} />
+            <Input placeholder="Description" value={newIssue.description} onChange={(e) => setNewIssue({ ...newIssue, description: e.target.value })} />
+            <Input placeholder="Address" value={newIssue.address} onChange={(e) => setNewIssue({ ...newIssue, address: e.target.value })} />
+            <Select value={newIssue.category} onValueChange={(v) => setNewIssue({ ...newIssue, category: v })}>
+              <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="infrastructure">Infrastructure</SelectItem>
+                <SelectItem value="utilities">Utilities</SelectItem>
+                <SelectItem value="sanitation">Sanitation</SelectItem>
+                <SelectItem value="safety">Safety</SelectItem>
+                <SelectItem value="environment">Environment</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={newIssue.priority} onValueChange={(v) => setNewIssue({ ...newIssue, priority: v })}>
+              <SelectTrigger><SelectValue placeholder="Priority" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="urgent">Urgent</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input placeholder="Reporter Name" value={newIssue.reporterName} onChange={(e) => setNewIssue({ ...newIssue, reporterName: e.target.value })} />
+            <Input placeholder="Reporter Email" value={newIssue.reporterEmail} onChange={(e) => setNewIssue({ ...newIssue, reporterEmail: e.target.value })} />
+            <Input placeholder="Reporter Phone" value={newIssue.reporterPhone} onChange={(e) => setNewIssue({ ...newIssue, reporterPhone: e.target.value })} />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <Card className="shadow-card">
@@ -164,7 +257,7 @@ export default function Issues() {
       {/* Results Summary */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredIssues.length} of {mockIssues.length} issues
+          {loading ? 'Loading issues…' : `Showing ${filteredIssues.length} of ${issues.length} issues`}
         </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">Sort by Priority</Button>
@@ -176,7 +269,7 @@ export default function Issues() {
       <div className="space-y-4">
         {filteredIssues.map((issue, index) => (
           <motion.div
-            key={issue.id}
+            key={issue._id || issue.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -248,20 +341,20 @@ export default function Issues() {
                           <XCircle className="mr-1 h-4 w-4" />
                           Reject
                         </Button>
-                        <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground">
+                        <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => updateStatus(issue._id || issue.id, 'acknowledged')}>
                           <CheckCircle className="mr-1 h-4 w-4" />
                           Accept
                         </Button>
                       </>
                     )}
                     {issue.status === 'acknowledged' && (
-                      <Button size="sm" className="bg-civic-blue hover:bg-civic-blue/90 text-white">
+                      <Button size="sm" className="bg-civic-blue hover:bg-civic-blue/90 text-white" onClick={() => updateStatus(issue._id || issue.id, 'in_progress')}>
                         <UserCheck className="mr-1 h-4 w-4" />
                         Assign
                       </Button>
                     )}
                     {issue.status === 'in_progress' && (
-                      <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground">
+                      <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => updateStatus(issue._id || issue.id, 'resolved')}>
                         <CheckCircle className="mr-1 h-4 w-4" />
                         Mark Resolved
                       </Button>

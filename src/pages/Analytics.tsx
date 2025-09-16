@@ -1,9 +1,10 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { responseTimeData, categoryData, departmentPerformance, dashboardStats } from '@/data/mockData';
+import { API_BASE_URL } from '@/lib/utils';
 import {
   TrendingUp,
   TrendingDown,
@@ -51,11 +52,52 @@ const satisfactionTrend = [
   { month: 'Jun', rating: 4.7 }
 ];
 
+// Static chart data used only for visualization; KPIs come from backend
+const responseTimeData = [
+  { month: 'Jan', time: 5.2 },
+  { month: 'Feb', time: 4.8 },
+  { month: 'Mar', time: 4.5 },
+  { month: 'Apr', time: 4.2 },
+  { month: 'May', time: 4.0 },
+  { month: 'Jun', time: 4.2 }
+];
+
+const categoryData = [
+  { category: 'Infrastructure', count: 45, color: '#2563eb' },
+  { category: 'Utilities', count: 38, color: '#059669' },
+  { category: 'Sanitation', count: 32, color: '#dc2626' },
+  { category: 'Safety', count: 28, color: '#7c3aed' },
+  { category: 'Environment', count: 13, color: '#ea580c' }
+];
+
+const departmentPerformance = [
+  { department: 'Public Works', resolved: 34, pending: 8, efficiency: 81 },
+  { department: 'Utilities', resolved: 28, pending: 12, efficiency: 70 },
+  { department: 'Sanitation', resolved: 26, pending: 6, efficiency: 81 },
+  { department: 'Safety', resolved: 22, pending: 8, efficiency: 73 },
+  { department: 'Environment', resolved: 8, pending: 5, efficiency: 62 }
+];
+
 export default function Analytics() {
+  const [stats, setStats] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/analytics/dashboard`);
+        const data = await res.json();
+        setStats(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
   const kpiCards = [
     {
       title: 'Resolution Rate',
-      value: '94.2%',
+      value: stats ? `${Math.round((stats.resolvedIssues / Math.max(stats.totalIssues, 1)) * 100)}%` : '—',
       change: '+2.1%',
       trend: 'up',
       description: 'Issues resolved this month',
@@ -64,7 +106,7 @@ export default function Analytics() {
     },
     {
       title: 'Avg Response Time',
-      value: '4.2h',
+      value: stats ? `${stats.averageResponseTime}h` : '—',
       change: '-18min',
       trend: 'up',
       description: 'Time to first response',
@@ -73,7 +115,7 @@ export default function Analytics() {
     },
     {
       title: 'Citizen Satisfaction',
-      value: '4.7/5',
+      value: stats ? `${stats.citizenSatisfaction}/5` : '—',
       change: '+0.2',
       trend: 'up',
       description: 'Average rating',
@@ -82,7 +124,7 @@ export default function Analytics() {
     },
     {
       title: 'Active Officers',
-      value: '45',
+      value: stats?.activeOfficers ?? '—',
       change: '+3',
       trend: 'up',
       description: 'On duty personnel',
@@ -349,7 +391,7 @@ export default function Analytics() {
         >
           <Card className="shadow-card text-center">
             <CardContent className="p-6">
-              <div className="text-3xl font-bold text-primary mb-2">{dashboardStats.totalIssues}</div>
+              <div className="text-3xl font-bold text-primary mb-2">{stats?.totalIssues ?? '—'}</div>
               <div className="text-sm text-muted-foreground">Total Issues This Month</div>
               <div className="text-xs text-success mt-1">+12% from last month</div>
             </CardContent>
@@ -364,7 +406,7 @@ export default function Analytics() {
           <Card className="shadow-card text-center">
             <CardContent className="p-6">
               <div className="text-3xl font-bold text-success mb-2">
-                {Math.round((dashboardStats.resolvedIssues / dashboardStats.totalIssues) * 100)}%
+                {stats ? Math.round((stats.resolvedIssues / Math.max(stats.totalIssues, 1)) * 100) : '—'}%
               </div>
               <div className="text-sm text-muted-foreground">Resolution Rate</div>
               <div className="text-xs text-success mt-1">Above target of 90%</div>
@@ -379,7 +421,7 @@ export default function Analytics() {
         >
           <Card className="shadow-card text-center">
             <CardContent className="p-6">
-              <div className="text-3xl font-bold text-warning mb-2">{dashboardStats.averageResponseTime}h</div>
+              <div className="text-3xl font-bold text-warning mb-2">{stats ? `${stats.averageResponseTime}h` : '—'}</div>
               <div className="text-sm text-muted-foreground">Avg Response Time</div>
               <div className="text-xs text-success mt-1">25% improvement</div>
             </CardContent>

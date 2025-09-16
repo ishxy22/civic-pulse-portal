@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_BASE_URL } from '@/lib/utils';
 import { useTheme } from '@/contexts/ThemeContext';
 import {
   Settings as SettingsIcon,
@@ -55,9 +56,19 @@ export default function Settings() {
     backupFrequency: 'daily'
   });
 
-  const handleProfileSave = () => {
-    // Handle profile save
-    console.log('Profile saved:', profileData);
+  const handleProfileSave = async () => {
+    if (!user) return;
+    await fetch(`${API_BASE_URL}/users/${user.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: profileData.name,
+        email: profileData.email,
+        phone: profileData.phone,
+        department: profileData.department,
+        bio: profileData.bio
+      })
+    });
   };
 
   const handleSystemSave = () => {
