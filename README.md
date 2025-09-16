@@ -1,73 +1,67 @@
-# Welcome to your Lovable project
 
-## Project info
 
-**URL**: https://lovable.dev/projects/e20c14da-cef5-4158-a98c-46eb9169943f
+# SIH Project: Civic Pulse Admin Panel
 
-## How can I edit this code?
+This is the admin dashboard for the Civic Pulse application, a platform designed to monitor, manage, and resolve civic issues reported by citizens. This frontend provides administrators with the necessary tools to track new and ongoing issues, assign them to relevant departments, and update their statuses.
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+  * **Dashboard:** An overview of all reported issues.
+  * **Issue Management:** View details, filter, and sort issues by category, status, or priority.
+  * **User Actions:** Assign tasks, mark issues as resolved, accept, or reject reports.
+  * **Responsive UI:** A clean and modern interface built with Tailwind CSS.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e20c14da-cef5-4158-a98c-46eb9169943f) and start prompting.
+## Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+Before you begin, ensure you have the following installed on your system:
 
-**Use your preferred IDE**
+  * [Node.js](https://nodejs.org/) (v18 or newer recommended)
+  * [npm](https://www.npmjs.com/) (comes with Node.js)
+  * [Git](https://git-scm.com/)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
 
-Follow these steps:
+### 1\. Clone the Repository
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+First, clone the repository to your local machine using Git.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+git clone https://github.com/kanhaiya-98/SIH-PROJECT.git
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 2\. Navigate to the Project Directory
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Move into the newly created project folder.
+
+```bash
+cd SIH-PROJECT
+```
+
+### 3\. Install Dependencies
+
+This project has known peer dependency conflicts between its packages. To resolve this, you must use the `--legacy-peer-deps` flag during installation. This tells npm to use an older, less strict dependency resolution algorithm, which is required for this project to work correctly.
+
+```bash
+npm install --legacy-peer-deps
+```
+
+### 4\. Run the Development Server
+
+Once the installation is complete, you can start the local development server.
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+This will start the application and make it available in your web browser. The terminal will display the local URL, which is typically **http://localhost:5173/**.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Technologies Used
 
-**Use GitHub Codespaces**
+  * **Vite:** A next-generation frontend tooling for fast development.
+  * **React:** A JavaScript library for building user interfaces.
+  * **TypeScript:** A statically typed superset of JavaScript.
+  * **Tailwind CSS:** A utility-first CSS framework for rapid UI development.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/e20c14da-cef5-4158-a98c-46eb9169943f) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+-----
